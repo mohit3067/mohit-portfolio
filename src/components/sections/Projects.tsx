@@ -7,42 +7,61 @@ import { TechIcon } from "@/components/common/TechIcon";
 import { useProjects } from "@/hooks/useProjects";
 import { skills as allSkills } from "@/data/portfolio";
 
-// Map common tech names to simple-icons brand metadata.
-const techMeta: Record<string, { icon?: string; color?: string }> = Object.fromEntries(
-  allSkills.map((s) => [s.name.toLowerCase(), { icon: s.icon, color: s.color?.replace("#", "") }])
-);
-// Manual extras used in project tech stacks
-Object.assign(techMeta, {
-  flutter: { icon: "flutter", color: "54C5F8" },
-  dart: { icon: "dart", color: "0175C2" },
-  firebase: { icon: "firebase", color: "FFCA28" },
-  "rest apis": { icon: "fastapi", color: "009688" },
-  nfc: { icon: "nfc", color: "003366" },
-  ble: { icon: "bluetooth", color: "0082FC" },
-  maps: { icon: "googlemaps", color: "4285F4" },
-  ml: { icon: "tensorflow", color: "FF6F00" },
-  camera: { icon: "googlelens", color: "4285F4" },
-  razorpay: { icon: "razorpay", color: "0C2451" },
-  "zoho salesiq": { icon: "zoho", color: "E42527" },
-  "zoho desk": { icon: "zoho", color: "E42527" },
-  "speech-to-text": { icon: "googleassistant", color: "4285F4" },
-  sqlite: { icon: "sqlite", color: "003B57" },
-  supabase: { icon: "supabase", color: "3ECF8E" },
-  getx: {},
-});
-
 export const Projects = () => {
-  const { projects, loading, source } = useProjects();
+  const { projects, loading, source, isUpdating } = useProjects();
   const [filter, setFilter] = useState<string>("All");
+
+  // Move techMeta inside with better safety
+  const techMeta = useMemo(() => {
+    const meta: Record<string, { icon?: string; color?: string }> = {};
+
+    // Process skills data safely
+    if (Array.isArray(allSkills)) {
+      allSkills.forEach((s) => {
+        if (s && s.name) {
+          meta[s.name.toLowerCase()] = {
+            icon: s.icon,
+            color: s.color?.replace("#", "")
+          };
+        }
+      });
+    }
+
+    // Add manual overrides
+    return {
+      ...meta,
+      flutter: { icon: "flutter", color: "54C5F8" },
+      dart: { icon: "dart", color: "0175C2" },
+      firebase: { icon: "firebase", color: "FFCA28" },
+      "rest apis": { icon: "fastapi", color: "009688" },
+      nfc: { icon: "nfc", color: "003366" },
+      ble: { icon: "bluetooth", color: "0082FC" },
+      maps: { icon: "googlemaps", color: "4285F4" },
+      ml: { icon: "tensorflow", color: "FF6F00" },
+      camera: { icon: "googlelens", color: "4285F4" },
+      razorpay: { icon: "razorpay", color: "0C2451" },
+      "zoho salesiq": { icon: "zoho", color: "E42527" },
+      "zoho desk": { icon: "zoho", color: "E42527" },
+      "speech-to-text": { icon: "googleassistant", color: "4285F4" },
+      sqlite: { icon: "sqlite", color: "003B57" },
+      supabase: { icon: "supabase", color: "3ECF8E" },
+      getx: {},
+    };
+  }, []);
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    projects.forEach((p) => p.category && set.add(p.category));
+    if (Array.isArray(projects)) {
+      projects.forEach((p) => p && p.category && set.add(p.category));
+    }
     return ["All", ...Array.from(set)];
   }, [projects]);
 
   const visible = useMemo(
-    () => (filter === "All" ? projects : projects.filter((p) => p.category === filter)),
+    () => {
+      if (!Array.isArray(projects)) return [];
+      return filter === "All" ? projects : projects.filter((p) => p && p.category === filter);
+    },
     [projects, filter]
   );
 
@@ -68,11 +87,10 @@ export const Projects = () => {
               <button
                 key={c}
                 onClick={() => setFilter(c)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider border transition-all ${
-                  filter === c
-                    ? "bg-gradient-primary text-primary-foreground border-transparent shadow-glow"
-                    : "border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/60"
-                }`}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider border transition-all ${filter === c
+                  ? "bg-gradient-primary text-primary-foreground border-transparent shadow-glow"
+                  : "border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/60"
+                  }`}
               >
                 {c}
               </button>
@@ -163,7 +181,7 @@ export const Projects = () => {
                 {/* Tech stack with icons */}
                 <ul className="flex flex-wrap gap-1.5 mb-5">
                   {p.techStack.map((t) => {
-                    const meta = techMeta[t.toLowerCase()] ?? {};
+                    const meta = (techMeta as Record<string, any>)[t.toLowerCase()] ?? {};
                     return (
                       <li
                         key={t}

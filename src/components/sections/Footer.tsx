@@ -7,9 +7,9 @@ export const Footer = () => {
       <div className="container-tight px-6 md:px-10 lg:px-16 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg overflow-hidden shadow-glow">
-            <img 
-              src="/logo.png" 
-              alt="Mohit Logo" 
+            <img
+              src="logo.png"
+              alt="Mohit Logo"
               className="h-full w-full object-cover"
             />
           </div>

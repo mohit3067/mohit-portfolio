@@ -7,6 +7,14 @@ import { useRemoteConfig } from "@/hooks/useRemoteConfig";
 export const Hero = () => {
   const { resumeUrl } = useRemoteConfig();
 
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id.replace("#", ""));
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <section
       id="top"
@@ -87,6 +95,7 @@ export const Hero = () => {
           >
             <a
               href="#projects"
+              onClick={(e) => scrollToSection(e, "#projects")}
               className="group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-primary text-primary-foreground font-medium shadow-glow hover:shadow-glow-violet transition-all"
             >
               View Projects
@@ -103,6 +112,7 @@ export const Hero = () => {
             </a>
             <a
               href="#contact"
+              onClick={(e) => scrollToSection(e, "#contact")}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-muted-foreground hover:text-foreground transition-colors"
             >
               <Mail size={16} />
